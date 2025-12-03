@@ -59,7 +59,7 @@ export default function Home() {
       } catch {}
     };
     fetchRows();
-    const interval = setInterval(fetchRows, 30_000);
+    const interval = setInterval(fetchRows, 900_000);
     return () => {
       mounted = false;
       clearInterval(interval);
@@ -118,6 +118,7 @@ export default function Home() {
               <ChartBarLabel
                 title={row.category}
                 titleClassName="text-2xl md:text-3xl"
+                rightText={String(row.values.reduce((acc, v) => acc + Number(v || 0), 0))}
                 data={row.seriesNames.map((label, i) => ({ label, value: Number(row.values[i] || 0) }))}
               />
             ) : (

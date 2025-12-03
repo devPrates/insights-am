@@ -17,23 +17,30 @@ export function ChartBarLabel({
   description,
   data,
   titleClassName,
+  rightText,
 }: {
   title: string;
   description?: string;
   data: Datum[];
   titleClassName?: string;
+  rightText?: string;
 }) {
   const fills = data.map((d) =>
     d.label === "Prazo técnico"
       ? "#FACC15"
       : d.label === "Atrasadas"
       ? "#EF4444"
+      : d.label === "Antecipadas"
+      ? "#22C55E"
       : "var(--color-value)"
   );
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex items-center justify-between">
         <CardTitle className={titleClassName}>{title}</CardTitle>
+        {rightText ? (
+          <div className="text-xl font-semibold">{rightText}</div>
+        ) : null}
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
