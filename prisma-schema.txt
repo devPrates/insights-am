@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_DATABASE_URL")
+}
+
+model DivColabBRow {
+  id           BigInt   @id @default(autoincrement())
+  runId        String   @db.Uuid
+  capturedAt   DateTime @db.Timestamptz
+  category     String   @unique
+  seriesNames  String[]
+  values       Decimal[] @db.Decimal
+}
