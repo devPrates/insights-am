@@ -15,3 +15,11 @@ model DivColabBRow {
   seriesNames  String[]
   values       Decimal[] @db.Decimal
 }
+
+model WeeklyHistory {
+  id             Int      @id @default(autoincrement())
+  reference_date DateTime
+  payload        Json
+
+  @@map("weekly_history") // nome exato da tabela no banco
+}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { ChartBarLabel } from "@/components/bar-chart-label";
 import { Progress } from "@/components/ui/progress";
+import LineChartCollab from "@/components/line-chart-collab";
 
 type DivColabBRow = {
   id: string;
@@ -118,8 +119,15 @@ export default function Home() {
               <ChartBarLabel
                 title={row.category}
                 titleClassName="text-2xl md:text-3xl"
-                rightText={String(row.values.reduce((acc, v) => acc + Number(v || 0), 0))}
-                data={row.seriesNames.map((label, i) => ({ label, value: Number(row.values[i] || 0) }))}
+                rightText={String(
+                  row.seriesNames
+                    .map((label, i) => ({ label, value: Number(row.values[i] || 0) }))
+                    .filter((p) => p.label !== "M.E. (dias antes)" && p.label !== "M.E.")
+                    .reduce((acc, p) => acc + p.value, 0)
+                )}
+                data={row.seriesNames
+                  .map((label, i) => ({ label, value: Number(row.values[i] || 0) }))
+                  .filter((p) => p.label !== "M.E. (dias antes)" && p.label !== "M.E.")}
               />
             ) : (
               <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">
@@ -132,6 +140,13 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <div className="mx-auto max-w-7xl p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from(new Set(rows.map((r) => r.category))).map((cat) => (
+            <LineChartCollab key={cat} category={cat} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
