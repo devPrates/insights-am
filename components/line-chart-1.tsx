@@ -143,9 +143,9 @@ export default function LineChart4() {
   const [selected, setSelected] = useState<string | undefined>(collaborators[0]);
   const data = useMemo(() => buildData(rows.filter((r) => (selected ? r.category === selected : true))), [rows, selected]);
   const labels = useMemo(() => [
+    { key: 'antecipadas', label: chartConfig.antecipadas.label, color: chartConfig.antecipadas.color },
     { key: 'prazoTecnico', label: chartConfig.prazoTecnico.label, color: chartConfig.prazoTecnico.color },
     { key: 'atrasadas', label: chartConfig.atrasadas.label, color: chartConfig.atrasadas.color },
-    { key: 'antecipadas', label: chartConfig.antecipadas.label, color: chartConfig.antecipadas.color },
   ], []);
   return (
     <div className="min-h-screen flex items-center justify-center p-6 lg:p-8">
@@ -217,17 +217,17 @@ export default function LineChart4() {
 
               <ChartTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3', stroke: 'var(--input)' }} />
 
+              <Line dataKey="antecipadas" type="monotone" stroke={chartConfig.antecipadas.color} strokeWidth={2} dot={false} />
               <Line dataKey="prazoTecnico" type="monotone" stroke={chartConfig.prazoTecnico.color} strokeWidth={2} dot={false} />
               <Line dataKey="atrasadas" type="monotone" stroke={chartConfig.atrasadas.color} strokeWidth={2} dot={false} />
-              <Line dataKey="antecipadas" type="monotone" stroke={chartConfig.antecipadas.color} strokeWidth={2} dot={false} />
             </LineChart>
           </ChartContainer>
 
           {/* Legend */}
           <div className="flex items-center justify-center gap-6">
+            <ChartLegend label={chartConfig.antecipadas.label} color={chartConfig.antecipadas.color} />
             <ChartLegend label={chartConfig.prazoTecnico.label} color={chartConfig.prazoTecnico.color} />
             <ChartLegend label={chartConfig.atrasadas.label} color={chartConfig.atrasadas.color} />
-            <ChartLegend label={chartConfig.antecipadas.label} color={chartConfig.antecipadas.color} />
           </div>
         </CardContent>
       </Card>

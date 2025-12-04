@@ -32,6 +32,8 @@ export function ChartBarLabel({
       ? "#EF4444"
       : d.label === "Antecipadas"
       ? "#22C55E"
+      : d.label === "Atrasadas justificadas" || d.label === "Justificadas"
+      ? "#3B82F6"
       : "var(--color-value)"
   );
   return (
@@ -39,13 +41,13 @@ export function ChartBarLabel({
       <CardHeader className="flex items-center justify-between">
         <CardTitle className={titleClassName}>{title}</CardTitle>
         {rightText ? (
-          <div className="text-xl font-semibold">{rightText}</div>
+          <div className="text-2xl font-bold">{rightText}</div>
         ) : null}
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={data} margin={{ top: 20 }}>
+          <BarChart accessibilityLayer data={data} margin={{ top: 40 }}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="label" tickLine={false} tickMargin={10} axisLine={false} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
@@ -53,7 +55,7 @@ export function ChartBarLabel({
               {fills.map((fill, i) => (
                 <Cell key={`cell-${i}`} fill={fill} />
               ))}
-              <LabelList position="top" offset={12} className="fill-foreground" fontSize={12} />
+              <LabelList position="top" offset={16} className="fill-foreground font-bold" fontSize={12} style={{ fontWeight: 700 }} />
             </Bar>
           </BarChart>
         </ChartContainer>

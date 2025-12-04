@@ -127,7 +127,20 @@ export default function Home() {
                 )}
                 data={row.seriesNames
                   .map((label, i) => ({ label, value: Number(row.values[i] || 0) }))
-                  .filter((p) => p.label !== "M.E. (dias antes)" && p.label !== "M.E.")}
+                  .filter((p) => p.label !== "M.E. (dias antes)" && p.label !== "M.E.")
+                  .sort((a, b) => {
+                    const order = (x: string) =>
+                      x === "Antecipadas"
+                        ? 0
+                        : x === "Prazo técnico"
+                        ? 1
+                        : x === "Atrasadas justificadas"
+                        ? 2
+                        : x === "Atrasadas"
+                        ? 3
+                        : 99;
+                    return order(a.label) - order(b.label);
+                  })}
               />
             ) : (
               <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">
@@ -141,7 +154,7 @@ export default function Home() {
         </section>
       </main>
       <div className="mx-auto max-w-7xl p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {Array.from(new Set(rows.map((r) => r.category))).map((cat) => (
             <LineChartCollab key={cat} category={cat} />
           ))}

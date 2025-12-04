@@ -14,9 +14,10 @@ type WeeklyHistoryItem = {
 };
 
 const chartConfig = {
-  prazoTecnico: { label: "Prazo técnico", color: "#FACC15" },
-  atrasadas: { label: "Atrasadas", color: "#EF4444" },
   antecipadas: { label: "Antecipadas", color: "#22C55E" },
+  prazoTecnico: { label: "Prazo técnico", color: "#FACC15" },
+  justificadas: { label: "Justificadas", color: "#3B82F6" },
+  atrasadas: { label: "Atrasadas", color: "#EF4444" },
 } satisfies ChartConfig;
 
 function ChartLabel({ label, color }: { label: string; color: string }) {
@@ -55,7 +56,7 @@ function formatDayMonth(iso: string) {
   return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(d);
 }
 function buildData(category: string, items: WeeklyHistoryItem[]) {
-  const out: Array<{ time: string; prazoTecnico: number; atrasadas: number; antecipadas: number }> = [];
+  const out: Array<{ time: string; antecipadas: number; prazoTecnico: number; justificadas: number; atrasadas: number }> = [];
   for (const item of items) {
     const idx = item.payload.categories.indexOf(category);
     if (idx < 0) continue;
@@ -65,9 +66,10 @@ function buildData(category: string, items: WeeklyHistoryItem[]) {
     };
     out.push({
       time: formatDayMonth(item.reference_date),
-      prazoTecnico: val("Prazo técnico"),
-      atrasadas: val("Atrasadas"),
       antecipadas: val("Antecipadas"),
+      prazoTecnico: val("Prazo técnico"),
+      justificadas: val("Atrasadas justificadas"),
+      atrasadas: val("Atrasadas"),
     });
   }
   return out;
@@ -100,9 +102,10 @@ export default function LineChartCollab({ category }: { category: string }) {
   const data = useMemo(() => buildData(category, items), [category, items]);
   const labels = useMemo(
     () => [
-      { key: "prazoTecnico", label: chartConfig.prazoTecnico.label, color: chartConfig.prazoTecnico.color },
-      { key: "atrasadas", label: chartConfig.atrasadas.label, color: chartConfig.atrasadas.color },
       { key: "antecipadas", label: chartConfig.antecipadas.label, color: chartConfig.antecipadas.color },
+      { key: "prazoTecnico", label: chartConfig.prazoTecnico.label, color: chartConfig.prazoTecnico.color },
+      { key: "justificadas", label: chartConfig.justificadas.label, color: chartConfig.justificadas.color },
+      { key: "atrasadas", label: chartConfig.atrasadas.label, color: chartConfig.atrasadas.color },
     ],
     []
   );
@@ -126,9 +129,10 @@ export default function LineChartCollab({ category }: { category: string }) {
             <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted-foreground)" }} tickMargin={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted-foreground)" }} tickFormatter={(value) => `${value}`} domain={[0, 250]} ticks={[0, 50, 100, 150, 200, 250]} tickMargin={10} />
             <ChartTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: "3 3", stroke: "var(--input)" }} />
-            <Line dataKey="prazoTecnico" type="monotone" stroke={chartConfig.prazoTecnico.color} strokeWidth={2} dot={false} />
-            <Line dataKey="atrasadas" type="monotone" stroke={chartConfig.atrasadas.color} strokeWidth={2} dot={false} />
             <Line dataKey="antecipadas" type="monotone" stroke={chartConfig.antecipadas.color} strokeWidth={2} dot={false} />
+            <Line dataKey="prazoTecnico" type="monotone" stroke={chartConfig.prazoTecnico.color} strokeWidth={2} dot={false} />
+            <Line dataKey="justificadas" type="monotone" stroke={chartConfig.justificadas.color} strokeWidth={2} dot={false} />
+            <Line dataKey="atrasadas" type="monotone" stroke={chartConfig.atrasadas.color} strokeWidth={2} dot={false} />
           </LineChart>
         </ChartContainer>
       </CardContent>
