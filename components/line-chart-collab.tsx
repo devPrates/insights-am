@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardToolbar } from "./ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip } from "./ui/chart";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -75,30 +75,9 @@ function buildData(category: string, items: WeeklyHistoryItem[]) {
   return out;
 }
 
-function useWeeklyHistory() {
-  const [items, setItems] = useState<WeeklyHistoryItem[]>([]);
-  useEffect(() => {
-    let mounted = true;
-    const fetchItems = async () => {
-      try {
-        const res = await fetch("/api/weekly-history", { cache: "no-store" });
-        if (!res.ok) return;
-        const json = await res.json();
-        if (mounted && Array.isArray(json.items)) setItems(json.items as WeeklyHistoryItem[]);
-      } catch {}
-    };
-    fetchItems();
-    const t = setInterval(fetchItems, 900000);
-    return () => {
-      mounted = false;
-      clearInterval(t);
-    };
-  }, []);
-  return items;
-}
+ 
 
-export default function LineChartCollab({ category }: { category: string }) {
-  const items = useWeeklyHistory();
+export default function LineChartCollab({ category, items }: { category: string; items: WeeklyHistoryItem[] }) {
   const data = useMemo(() => buildData(category, items), [category, items]);
   const labels = useMemo(
     () => [

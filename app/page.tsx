@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChartBarLabel } from "@/components/bar-chart-label";
 import { Progress } from "@/components/ui/progress";
 import LineChartCollab from "@/components/line-chart-collab";
+import type { WeeklyHistoryPayload } from "@/lib/weekly-history";
 
 type DivColabBRow = {
   id: string;
@@ -15,6 +16,7 @@ type DivColabBRow = {
 };
 
 const MOCK_ROWS: DivColabBRow[] = [];
+type WeeklyHistoryItem = { reference_date: string; payload: WeeklyHistoryPayload };
 
 function useRotatingRow(rows: DivColabBRow[], intervalMs: number) {
   const [index, setIndex] = useState(0);
@@ -38,6 +40,7 @@ function StatCard({ title, value }: { title: string; value: number }) {
 
 export default function Home() {
   const [rows, setRows] = useState<DivColabBRow[]>(MOCK_ROWS);
+  const [weeklyItems, setWeeklyItems] = useState<WeeklyHistoryItem[]>([]);
   const { row, index } = useRotatingRow(rows, 30_000);
   const [progress, setProgress] = useState(0);
 
@@ -61,6 +64,24 @@ export default function Home() {
     };
     fetchRows();
     const interval = setInterval(fetchRows, 900_000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchWeekly = async () => {
+      try {
+        const res = await fetch("/api/weekly-history", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (mounted && Array.isArray(json.items)) setWeeklyItems(json.items as WeeklyHistoryItem[]);
+      } catch {}
+    };
+    fetchWeekly();
+    const interval = setInterval(fetchWeekly, 900_000);
     return () => {
       mounted = false;
       clearInterval(interval);
@@ -156,7 +177,7 @@ export default function Home() {
       <div className="mx-auto max-w-7xl p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {Array.from(new Set(rows.map((r) => r.category))).map((cat) => (
-            <LineChartCollab key={cat} category={cat} />
+            <LineChartCollab key={cat} category={cat} items={weeklyItems} />
           ))}
         </div>
       </div>
