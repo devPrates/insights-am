@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { ChartBarLabel } from "@/components/bar-chart-label";
+import StatisticCard1 from "@/components/statistic-card-1";
 import { Progress } from "@/components/ui/progress";
 import LineChartCollab from "@/components/line-chart-collab";
 import type { WeeklyHistoryPayload } from "@/lib/weekly-history";
@@ -125,13 +126,7 @@ export default function Home() {
 
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-6 md:grid-cols-3">
         <section className="md:col-span-1">
-          <div className="flex h-full flex-col gap-3">
-            <StatCard title="Total" value={stats.total} />
-            <StatCard title="Antecipados" value={stats.antecipados} />
-            <StatCard title="No prazo" value={stats.noPrazo} />
-            <StatCard title="Atraso" value={stats.atraso} />
-            <StatCard title="Justificado" value={stats.justificado} />
-          </div>
+          <StatisticCard1 items={weeklyItems} />
         </section>
 
         <section className="md:col-span-2">

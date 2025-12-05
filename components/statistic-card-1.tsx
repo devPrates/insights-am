@@ -1,55 +1,14 @@
 import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardToolbar } from './ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { ArrowDown, ArrowUp, MoreHorizontal, Pin, Settings, Share2, Trash, TriangleAlert } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import type { WeeklyHistoryPayload } from '@/lib/weekly-history';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
-const stats = [
-  {
-    title: 'All Orders',
-    value: 122380,
-    delta: 15.1,
-    lastMonth: 105922,
-    positive: true,
-    prefix: '',
-    suffix: '',
-  },
-  {
-    title: 'Order Created',
-    value: 1902380,
-    delta: -2.0,
-    lastMonth: 2002098,
-    positive: false,
-    prefix: '',
-    suffix: '',
-  },
-  {
-    title: 'Organic Sales',
-    value: 98100000,
-    delta: 0.4,
-    lastMonth: 97800000,
-    positive: true,
-    prefix: '$',
-    suffix: 'M',
-    format: (v: number) => `$${(v / 1_000_000).toFixed(1)}M`,
-    lastFormat: (v: number) => `$${(v / 1_000_000).toFixed(1)}M`,
-  },
-  {
-    title: 'Active Users',
-    value: 48210,
-    delta: 3.7,
-    lastMonth: 46480,
-    positive: true,
-    prefix: '',
-    suffix: '',
-  },
-];
+type WeeklyHistoryItem = { reference_date: string; payload: WeeklyHistoryPayload };
+
+function sumSeries(payload: WeeklyHistoryPayload, name: string) {
+  const s = payload.series.find((x) => x.name === name);
+  return (s?.data || []).reduce((a, b) => a + (Number(b) || 0), 0);
+}
 
 function formatNumber(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
@@ -57,66 +16,56 @@ function formatNumber(n: number) {
   return n.toString();
 }
 
-export default function StatisticCard1() {
+export default function StatisticCard1({ items }: { items: WeeklyHistoryItem[] }) {
+  const sorted = [...items].sort((a, b) => new Date(a.reference_date).getTime() - new Date(b.reference_date).getTime());
+  const current = sorted[sorted.length - 1];
+  const previous = sorted[sorted.length - 2];
+
+  const curAnte = current ? sumSeries(current.payload, 'Antecipadas') : 0;
+  const curPrazo = current ? sumSeries(current.payload, 'Prazo técnico') : 0;
+  const curAtraso = current ? sumSeries(current.payload, 'Atrasadas') : 0;
+  const curJust = current ? sumSeries(current.payload, 'Atrasadas justificadas') : 0;
+  const curTotal = curAnte + curPrazo + curAtraso + curJust;
+
+  const prevAnte = previous ? sumSeries(previous.payload, 'Antecipadas') : 0;
+  const prevPrazo = previous ? sumSeries(previous.payload, 'Prazo técnico') : 0;
+  const prevAtraso = previous ? sumSeries(previous.payload, 'Atrasadas') : 0;
+  const prevJust = previous ? sumSeries(previous.payload, 'Atrasadas justificadas') : 0;
+  const prevTotal = prevAnte + prevPrazo + prevAtraso + prevJust;
+
+  const mkDelta = (cur: number, prev: number) => {
+    if (!prev) return { delta: 0, positive: cur >= 0 };
+    const d = ((cur - prev) / prev) * 100;
+    return { delta: Number(d.toFixed(1)), positive: d >= 0 };
+  };
+
+  const cards = [
+    { title: 'Total', value: curTotal, prev: prevTotal, delta: mkDelta(curTotal, prevTotal) },
+    { title: 'Antecipados', value: curAnte, prev: prevAnte, delta: mkDelta(curAnte, prevAnte) },
+    { title: 'No prazo', value: curPrazo, prev: prevPrazo, delta: mkDelta(curPrazo, prevPrazo) },
+    { title: 'Atraso', value: curAtraso, prev: prevAtraso, delta: mkDelta(curAtraso, prevAtraso) },
+    { title: 'Justificado', value: curJust, prev: prevJust, delta: mkDelta(curJust, prevJust) },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 lg:p-8">
-      <div className="grow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="border-0">
-              <CardTitle className="text-muted-foreground text-sm font-medium">{stat.title}</CardTitle>
-              <CardToolbar>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="dim" size="sm" mode="icon" className="-me-1.5">
-                      <MoreHorizontal />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom">
-                    <DropdownMenuItem>
-                      <Settings />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <TriangleAlert /> Add Alert
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Pin /> Pin to Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Share2 /> Share
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      <Trash />
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardToolbar>
-            </CardHeader>
-            <CardContent className="space-y-2.5">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-medium text-foreground tracking-tight">
-                  {stat.format ? stat.format(stat.value) : stat.prefix + formatNumber(stat.value) + stat.suffix}
-                </span>
-                <Badge variant={stat.positive ? 'success' : 'destructive'} appearance="light">
-                  {stat.delta > 0 ? <ArrowUp /> : <ArrowDown />}
-                  {stat.delta}%
-                </Badge>
-              </div>
-              <div className="text-xs text-muted-foreground mt-2 border-t pt-2.5">
-                Vs last month:{' '}
-                <span className="font-medium text-foreground">
-                  {stat.lastFormat
-                    ? stat.lastFormat(stat.lastMonth)
-                    : stat.prefix + formatNumber(stat.lastMonth) + stat.suffix}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {cards.map((stat, index) => (
+        <Card key={index}>
+          <CardHeader className="border-0 pb-0">
+            <CardTitle className="text-muted-foreground text-sm font-medium">{stat.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pt-1 pb-5 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold text-foreground tracking-tight">{formatNumber(stat.value)}</span>
+              <Badge variant={stat.delta.positive ? 'success' : 'destructive'} appearance="light">
+                {stat.delta.delta >= 0 ? <ArrowUp /> : <ArrowDown />}
+                {stat.delta.delta}%
+              </Badge>
+            </div>
+            <div className="text-xs text-muted-foreground mt-2 border-t pt-2.5">Semana anterior: <span className="font-medium text-foreground">{formatNumber(stat.prev)}</span></div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
